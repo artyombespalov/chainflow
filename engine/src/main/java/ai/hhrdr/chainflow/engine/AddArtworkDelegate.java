@@ -31,12 +31,15 @@ public class AddArtworkDelegate implements JavaDelegate {
         String artDescription = (String) execution.getVariable("art_description");
         String imgArtThumbnail = (String) execution.getVariable("img_picture");
         String userId = (String) execution.getVariable("user_id");
+        String artDescriptionPrompt = (String) execution.getVariable("art_description_prompt");
 
         JSONObject json = new JSONObject();
         json.put("art_name", artName);
         json.put("art_description", artDescription);
         json.put("img_picture", imgArtThumbnail);
         json.put("camunda_user_id", userId);
+        json.put("art_description_prompt", artDescriptionPrompt);
+
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
@@ -51,7 +54,7 @@ public class AddArtworkDelegate implements JavaDelegate {
             // Assuming the response body contains a JSON object
             JSONObject art = new JSONObject(response.body());
             String artId = art.getString("id"); // Extracting the 'id' as a string
-            execution.setVariable("current_art_id", artId);
+            execution.setVariable("art_id", artId);
             LOGGER.info("Art creation response status code: " + response.statusCode());
             LOGGER.info("Art creation response body: " + response.body());
             // Optionally, you can handle the response further, for example, to log or process the result.
