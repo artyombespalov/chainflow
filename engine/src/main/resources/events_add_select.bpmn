@@ -10,7 +10,7 @@
       <bpmn:outgoing>Flow_0qpb068</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:endEvent id="Event_1i0hla4">
-      <bpmn:incoming>Flow_0uf88y3</bpmn:incoming>
+      <bpmn:incoming>Flow_0yy3wno</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:serviceTask id="AddEventDelegate" name="AddEventDelegate" camunda:class="ai.hhrdr.chainflow.engine.AddEventDelegate">
       <bpmn:incoming>Flow_1quc0pi</bpmn:incoming>
@@ -44,8 +44,20 @@
       <bpmn:incoming>Flow_06a3fdx</bpmn:incoming>
       <bpmn:outgoing>Flow_0uf88y3</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="Flow_0uf88y3" sourceRef="Gateway_05tpogp" targetRef="Event_1i0hla4" />
+    <bpmn:sequenceFlow id="Flow_0uf88y3" sourceRef="Gateway_05tpogp" targetRef="qr_generation" />
     <bpmn:sequenceFlow id="Flow_06a3fdx" sourceRef="Gateway_1m24tns" targetRef="Gateway_05tpogp" />
+    <bpmn:userTask id="qr_generation" name="Generate QR Code" camunda:assignee="${camunda_user_id}">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="event_id" label="event_id" type="string" defaultValue="${event_id}" />
+          <camunda:formField id="ref_id" label="ref_id" type="string" defaultValue="${camunda_user_id}" />
+          <camunda:formField id="def" label="def" type="string" defaultValue="generate-ai-artwork" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0uf88y3</bpmn:incoming>
+      <bpmn:outgoing>Flow_0yy3wno</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0yy3wno" sourceRef="qr_generation" targetRef="Event_1i0hla4" />
     <bpmn:textAnnotation id="TextAnnotation_0f5z1ok">
       <bpmn:text>task_type = choose_add_event returns event_id (if choosen from list) or event_name/description etc if created new</bpmn:text>
     </bpmn:textAnnotation>
@@ -55,9 +67,6 @@
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="events_add_select">
       <bpmndi:BPMNShape id="BPMNShape_0ik79l4" bpmnElement="Event_09lcly3">
         <dc:Bounds x="112" y="202" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_1rmuieb" bpmnElement="Event_1i0hla4">
-        <dc:Bounds x="662" y="202" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_1czdglf" bpmnElement="AddEventDelegate">
         <dc:Bounds x="440" y="80" width="100" height="80" />
@@ -72,6 +81,12 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_05tpogp_di" bpmnElement="Gateway_05tpogp" isMarkerVisible="true">
         <dc:Bounds x="571" y="195" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0735co6_di" bpmnElement="qr_generation">
+        <dc:Bounds x="700" y="180" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1rmuieb" bpmnElement="Event_1i0hla4">
+        <dc:Bounds x="932" y="202" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_0f5z1ok_di" bpmnElement="TextAnnotation_0f5z1ok">
         <dc:Bounds x="120" y="90" width="250" height="60" />
@@ -97,7 +112,7 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0uf88y3_di" bpmnElement="Flow_0uf88y3">
         <di:waypoint x="621" y="220" />
-        <di:waypoint x="662" y="220" />
+        <di:waypoint x="700" y="220" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_06a3fdx_di" bpmnElement="Flow_06a3fdx">
         <di:waypoint x="395" y="220" />
@@ -106,6 +121,10 @@
       <bpmndi:BPMNEdge id="Association_01du55o_di" bpmnElement="Association_01du55o">
         <di:waypoint x="212" y="184" />
         <di:waypoint x="168" y="150" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0yy3wno_di" bpmnElement="Flow_0yy3wno">
+        <di:waypoint x="800" y="220" />
+        <di:waypoint x="932" y="220" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 # Environment variables to configure the script
 TOPIC_NAME = os.getenv('TOPIC_NAME', "DallEGenerateDescriptivePrompt")
-CAMUNDA_URL = os.getenv('CAMUNDA_URL', 'http://localhost:8080/engine-rest')
+CAMUNDA_URL = os.getenv('CAMUNDA_URL', 'http://demo:demo@localhost:8080/engine-rest')
 
 # Logging the script startup
 logging.info("Starting Dali Generate Art Prompt script")
@@ -30,18 +30,18 @@ client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
 # Main function to describe images using OpenAI's model
-async def describe_image_with_openai_vision(image_url, name, description, image_type):
+async def describe_image_with_openai_vision(image_url, name, description, image_type) -> tuple[bool, str]:
     # Example of logging an operation
     logging.info(f"Generating description for {image_type} image: {image_url}")
     if image_type == 'person':
-        prompt = "Analyze the photograph and provide a comprehensive description of the person's physical appearance, focusing on facial features such as the shape and proportion of the face, eyes, nose, mouth, hair texture and color, as well as the body type. Exclude clothing, accessories, and background. Maximum length 250 words."
+        prompt = "Generate a description of a person from a photograph. Focus on the individual's body type, facial features such as the shape of their face, the hair's length, style, and color, as well as any notable expressions or gestures they may be making. The description should serve to convey the person's likeness without revealing their personal identity. Maximum 250 words"
     else:
-        prompt = "Provide a detailed analysis of the visual elements, colors, textures, and any distinctive stylistic features present in the image. Focus on describing the composition, any patterns or motifs, the use of light and shadow, and overall thematic presence. Refrain from evaluating the artistic medium or categorizing the image; concentrate only on the observable details. Maximum length 250 words."
+        prompt = "Provide a detailed analysis of the visual elements, colors, textures, and any distinctive stylistic features present in the image. Focus on describing the composition, any patterns or motifs, the use of light and shadow, and overall thematic presence. Maximum length 250 words."
 
     prompt = f"{prompt}\n\nArtwork Name: {name}\n\nArtwork Description: {description}"
 
     try:
-        response = await client.chat.completions.create(model="gpt-4-1106-vision-preview",
+        response = await client.chat.completions.create(model="gpt-4-vision-preview",
                                                         messages=[
                                                             {
                                                                 "role": "user",
@@ -56,12 +56,14 @@ async def describe_image_with_openai_vision(image_url, name, description, image_
         if response.choices and len(response.choices) > 0:
             choice = response.choices[0]
             description_text = choice.message.content
-            return description_text.strip()
-        logging.error(f"Error while generating description for image: {e}")
-        return None
+            return True, description_text.strip()
+        message = f"Error while generating description for image: {response}"
+        logging.error(message)
+        return False, message
     except Exception as e:
-        logging.error(f"Error while generating description for image: {e}")
-        return None
+        message = f"Error while generating description for image: {str(e)}"
+        logging.error(message)
+        return False, message
 
 
 # Function to handle tasks from Camunda
@@ -69,23 +71,20 @@ def handle_task(task: ExternalTask) -> TaskResult:
     # Task handling code with added logging
     logging.info(f"Handling task")
     variables = task.get_variables()
-    img_art_thumbnail = variables.get("img_art_thumbnail")
-    art_name = variables.get("art_name")
-    art_description = variables.get("art_description")
-    image_type = variables.get("image_type")
+    img_art_thumbnail = variables.get("img_picture")
+    art_name = variables.get("name")
+    art_description = variables.get("description")
+    image_type = variables.get("type")
     loop = asyncio.get_event_loop()
-    description = loop.run_until_complete(describe_image_with_openai_vision(img_art_thumbnail, art_name,
+    status, result = loop.run_until_complete(describe_image_with_openai_vision(img_art_thumbnail, art_name,
                                                                             art_description, image_type))
-    if not description:
+    if not status:
         return task.bpmn_error(
             "art_description_generation_failed",
-            "art_description_generation_failed",
+            result,
             variables
         )
-    if image_type == 'person':
-        variables["person_description_prompt"] = description
-    else:
-        variables["art_description_prompt"] = description
+    variables["description_prompt"] = result
     return task.complete(variables)
 
 

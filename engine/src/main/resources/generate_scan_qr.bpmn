@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1l244tj" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.21.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.20.0">
+  <bpmn:process id="generate_scan_qr" name="Generate With QR Code" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1" camunda:initiator="camunda_user_id">
+      <bpmn:outgoing>Flow_1d0ay40</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_1d0ay40" sourceRef="StartEvent_1" targetRef="qr_reading" />
+    <bpmn:userTask id="qr_reading" name="Provide QR code" camunda:assignee="${camunda_user_id}">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="art_id" label="art_id" type="string" />
+          <camunda:formField id="event_id" label="event_id" type="string" />
+          <camunda:formField id="reference_id" label="reference_id" type="string" />
+          <camunda:formField id="def" label="def" type="string" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1d0ay40</bpmn:incoming>
+      <bpmn:outgoing>Flow_1348skz</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_1348skz" sourceRef="qr_reading" targetRef="Activity_04yjhqe" />
+    <bpmn:callActivity id="Activity_04yjhqe" name="Start process instance from QR" calledElement="${def}">
+      <bpmn:incoming>Flow_1348skz</bpmn:incoming>
+      <bpmn:outgoing>Flow_1inmkn9</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:endEvent id="Event_1ipbpbl">
+      <bpmn:incoming>Flow_1inmkn9</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1inmkn9" sourceRef="Activity_04yjhqe" targetRef="Event_1ipbpbl" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="generate_scan_qr">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="152" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1r4fbb1_di" bpmnElement="qr_reading">
+        <dc:Bounds x="310" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_18kmtle_di" bpmnElement="Activity_04yjhqe">
+        <dc:Bounds x="490" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1ipbpbl_di" bpmnElement="Event_1ipbpbl">
+        <dc:Bounds x="672" y="102" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1d0ay40_di" bpmnElement="Flow_1d0ay40">
+        <di:waypoint x="188" y="120" />
+        <di:waypoint x="310" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1348skz_di" bpmnElement="Flow_1348skz">
+        <di:waypoint x="410" y="120" />
+        <di:waypoint x="490" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1inmkn9_di" bpmnElement="Flow_1inmkn9">
+        <di:waypoint x="590" y="120" />
+        <di:waypoint x="672" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

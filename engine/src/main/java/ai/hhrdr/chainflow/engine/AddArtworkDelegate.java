@@ -27,19 +27,19 @@ public class AddArtworkDelegate implements JavaDelegate {
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
-        String artName = (String) execution.getVariable("art_name");
-        String artDescription = (String) execution.getVariable("art_description");
+        String artName = (String) execution.getVariable("name");
+        String artDescription = (String) execution.getVariable("description");
         String imgArtThumbnail = (String) execution.getVariable("img_picture");
         String userId = (String) execution.getVariable("camunda_user_id");
         String referenceId = (String) execution.getVariable("reference_id");
-        String artDescriptionPrompt = (String) execution.getVariable("art_description_prompt");
+        String artDescriptionPrompt = (String) execution.getVariable("description_prompt");
 
         JSONObject json = new JSONObject();
-        json.put("art_name", artName);
-        json.put("art_description", artDescription);
+        json.put("name", artName);
+        json.put("description", artDescription);
         json.put("img_picture", imgArtThumbnail);
         json.put("camunda_user_id", userId);
-        json.put("art_description_prompt", artDescriptionPrompt);
+        json.put("description_prompt", artDescriptionPrompt);
         json.put("reference_id", referenceId);
 
 
