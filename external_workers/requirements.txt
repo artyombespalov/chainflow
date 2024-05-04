@@ -4,3 +4,7 @@ web3
 httpx
 openai
 
+pytest
+pytest-asyncio
+boto3
+replicate

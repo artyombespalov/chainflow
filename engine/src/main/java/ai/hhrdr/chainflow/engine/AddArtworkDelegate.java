@@ -27,7 +27,9 @@ public class AddArtworkDelegate implements JavaDelegate {
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
+        String artId = (String) execution.getVariable("art_id");
         String artName = (String) execution.getVariable("name");
+        String artType = (String) execution.getVariable("type");
         String artDescription = (String) execution.getVariable("description");
         String imgArtThumbnail = (String) execution.getVariable("img_picture");
         String userId = (String) execution.getVariable("camunda_user_id");
@@ -36,33 +38,48 @@ public class AddArtworkDelegate implements JavaDelegate {
 
         JSONObject json = new JSONObject();
         json.put("name", artName);
+        json.put("type", artType);
         json.put("description", artDescription);
         json.put("img_picture", imgArtThumbnail);
         json.put("camunda_user_id", userId);
         json.put("description_prompt", artDescriptionPrompt);
         json.put("reference_id", referenceId);
 
-
         HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(apiURL + "/api/arts"))
-                .header("Content-Type", "application/json")
-                .header("Authorization", apiKey) // Ensure your API key is correctly set up for authorization
-                .POST(BodyPublishers.ofString(json.toString()))
-                .build();
-        try {
+        HttpRequest request;
+        HttpResponse<String> response;
 
-            HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-            // Assuming the response body contains a JSON object
-            JSONObject art = new JSONObject(response.body());
-            String artId = art.getString("id"); // Extracting the 'id' as a string
-            execution.setVariable("art_id", artId);
-            LOGGER.info("Art creation response status code: " + response.statusCode());
-            LOGGER.info("Art creation response body: " + response.body());
-            // Optionally, you can handle the response further, for example, to log or process the result.
+        if (artId == null) {
+            // Create new artwork
+            request = HttpRequest.newBuilder()
+                    .uri(URI.create(apiURL + "/api/arts"))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", apiKey)
+                    .POST(BodyPublishers.ofString(json.toString()))
+                    .build();
+        } else {
+            // Update existing artwork
+            request = HttpRequest.newBuilder()
+                    .uri(URI.create(apiURL + "/api/arts/" + artId))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", apiKey)
+                    .PUT(BodyPublishers.ofString(json.toString()))
+                    .build();
+        }
+
+        try {
+            response = client.send(request, BodyHandlers.ofString());
+            if (artId == null) {
+                // Extract new art ID and set it in the context if creating new art
+                JSONObject art = new JSONObject(response.body());
+                artId = art.getString("id");
+                execution.setVariable("art_id", artId);
+            }
+            LOGGER.info("Art operation response status code: " + response.statusCode());
+            LOGGER.info("Art operation response body: " + response.body());
         } catch (Exception e) {
-            LOGGER.severe("Failed to add art. Exception: " + e.getMessage());
-            throw e; // Rethrow if you want to indicate failure in the process
+            LOGGER.severe("Failed to process art. Exception: " + e.getMessage());
+            throw e;
         }
     }
 }
