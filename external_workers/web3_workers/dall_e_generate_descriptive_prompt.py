@@ -1,9 +1,11 @@
 import asyncio
+import json
 import os
 import logging
 from camunda.external_task.external_task import ExternalTask, TaskResult
 from camunda.external_task.external_task_worker import ExternalTaskWorker
 from openai import AsyncOpenAI
+from openai.types.chat.completion_create_params import ResponseFormat
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -35,13 +37,18 @@ async def describe_image_with_openai_vision(image_url, name, description, image_
     logging.info(f"Generating description for {image_type} image: {image_url}")
     if image_type == 'person':
         prompt = "Generate a description of a person from a photograph. Focus on the individual's body type, facial features such as the shape of their face, the hair's length, style, and color, as well as any notable expressions or gestures they may be making. The description should serve to convey the person's likeness without revealing their personal identity. Maximum 250 words"
+    elif image_type == 'generated_art':
+        prompt = "Provide name and description for the artwork based on the visual elements, colors, textures, and any distinctive stylistic features present in the image. Focus on describing the composition, any patterns or motifs, the use of light and shadow, and overall thematic presence. Maximum length of name 50 characters and description 250 words."
     else:
         prompt = "Provide a detailed analysis of the visual elements, colors, textures, and any distinctive stylistic features present in the image. Focus on describing the composition, any patterns or motifs, the use of light and shadow, and overall thematic presence. Maximum length 250 words."
 
-    prompt = f"{prompt}\n\nArtwork Name: {name}\n\nArtwork Description: {description}"
+    if name and description:
+        prompt = f"{prompt}\n\nArtwork Name: {name}\n\nArtwork Description: {description}"
+    else:
+        prompt = f"{prompt} generate a name and description for the artwork."
 
     try:
-        response = await client.chat.completions.create(model="gpt-4-vision-preview",
+        response = await client.chat.completions.create(model="gpt-4-1106-vision-preview",
                                                         messages=[
                                                             {
                                                                 "role": "user",
@@ -66,26 +73,103 @@ async def describe_image_with_openai_vision(image_url, name, description, image_
         return False, message
 
 
+async def name_description_based_of_vision_description(image_type, vision_description, retries: int = 2) -> tuple[
+    bool, str]:
+    # Define prompt based on the image type
+    logging.info(f"Generating description for {image_type} description: {vision_description}")
+    if image_type == 'person':
+        prompt = (f"Generate 2 words name and short, brief description for SEO page metadata "
+                  f"sentences description of the person on portrait: {vision_description}")
+    elif image_type == 'generated_art':
+        prompt = (f"Generate 2 words name and short, brief description for SEO page metadata of AI generated art:"
+                  f" {vision_description}")
+    else:
+        prompt = (f"Generate 2 words name and short, brief description for SEO page metadata"
+                  f" sentences description of the artwork: {vision_description}")
+    response_format = ResponseFormat(type="json_object")
+    # Call the OpenAI API
+    try:
+        response = await client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            response_format=response_format,
+            max_tokens=300,
+            n=1,
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant designed to output JSON."},
+                {"role": "user", "content": prompt}
+            ],
+
+        )
+
+        # Process the response
+        if response.choices:
+            description_text = response.choices[0].message.content
+            try:
+                name_description_dict = json.loads(description_text)
+                if "name" not in name_description_dict or "description" not in name_description_dict:
+                    if retries > 0:
+                        return await name_description_based_of_vision_description(image_type,
+                                                                                  vision_description, retries - 1)
+                else:
+                    return True, name_description_dict
+            except Exception as e:
+                error_message = f"Error while processing response: {str(e)}"
+                logging.error(error_message)
+                return False, error_message
+
+            return True, description_text
+        else:
+            error_message = "No description generated."
+            logging.error(error_message)
+            return False, error_message
+    except Exception as e:
+        error_message = f"API request failed: {str(e)}"
+        logging.error(error_message)
+        return False, error_message
+
+
 # Function to handle tasks from Camunda
 def handle_task(task: ExternalTask) -> TaskResult:
     # Task handling code with added logging
     logging.info(f"Handling task")
     variables = task.get_variables()
-    img_art_thumbnail = variables.get("img_picture")
+    img_picture = variables.get("img_picture")
     art_name = variables.get("name")
     art_description = variables.get("description")
     image_type = variables.get("type")
     loop = asyncio.get_event_loop()
-    status, result = loop.run_until_complete(describe_image_with_openai_vision(img_art_thumbnail, art_name,
-                                                                            art_description, image_type))
-    if not status:
-        return task.bpmn_error(
-            "art_description_generation_failed",
-            result,
-            variables
+    try:
+
+        status, vision_result = loop.run_until_complete(describe_image_with_openai_vision(img_picture, art_name,
+                                                                                          art_description, image_type))
+        if not status:
+            return task.bpmn_error(
+                "art_description_generation_failed",
+                vision_result,
+                variables
+            )
+        if art_name == 'default' or art_description == 'default':
+            status, name_description = loop.run_until_complete(name_description_based_of_vision_description(image_type,
+                                                                                                            vision_result))
+            if not status:
+                return task.bpmn_error(
+                    "art_description_generation_failed",
+                    name_description,
+                    variables
+                )
+            variables["name"] = name_description.get("name")
+            variables["description"] = name_description.get("description")
+        variables["description_prompt"] = vision_result
+
+        return task.complete(variables)
+    except Exception as e:
+        logging.error(f"Error during art description generation: {str(e)}")
+        return task.failure(
+            "ArtDescriptionGenerationError",
+            f"Failed to generate art description: {str(e)[:50]}",
+            max_retries=1,
+            retry_timeout=1000
         )
-    variables["description_prompt"] = result
-    return task.complete(variables)
 
 
 if __name__ == '__main__':

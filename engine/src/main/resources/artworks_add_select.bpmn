@@ -1,34 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1hqbnv9" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.21.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.20.0">
-  <bpmn:process id="artworks_add_select" name="Create/Select Artwork" isExecutable="true">
+  <bpmn:process id="artworks_add_select" name="Create/Select Artwork" isExecutable="true" camunda:historyTimeToLive="180">
     <bpmn:startEvent id="StartArtworksCreation" name="Start Artworks Creation" camunda:initiator="camunda_user_id">
       <bpmn:extensionElements>
         <camunda:formData />
       </bpmn:extensionElements>
       <bpmn:outgoing>Flow_0wnmv9v</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:subProcess id="Activity_0zrdzko">
-      <bpmn:incoming>Flow_0ciqvrp</bpmn:incoming>
-      <bpmn:incoming>Flow_10trgzt</bpmn:incoming>
-      <bpmn:outgoing>Flow_06be0zv</bpmn:outgoing>
-      <bpmn:startEvent id="Event_1amat17">
-        <bpmn:outgoing>Flow_1oix3ky</bpmn:outgoing>
-      </bpmn:startEvent>
-      <bpmn:serviceTask id="AddArtworkDelegate" name="Update Prompt for Art" camunda:class="ai.hhrdr.chainflow.engine.AddArtworkDelegate">
-        <bpmn:incoming>Flow_10gy4o5</bpmn:incoming>
-        <bpmn:outgoing>Flow_1j6z8it</bpmn:outgoing>
-      </bpmn:serviceTask>
-      <bpmn:serviceTask id="Activity_0n9xo47" name="DALL-E Generate Art Descriptive Prompt" camunda:type="external" camunda:topic="DallEGenerateDescriptivePrompt">
-        <bpmn:incoming>Flow_1oix3ky</bpmn:incoming>
-        <bpmn:outgoing>Flow_10gy4o5</bpmn:outgoing>
-      </bpmn:serviceTask>
-      <bpmn:sequenceFlow id="Flow_10gy4o5" sourceRef="Activity_0n9xo47" targetRef="AddArtworkDelegate" />
-      <bpmn:sequenceFlow id="Flow_1j6z8it" sourceRef="AddArtworkDelegate" targetRef="Event_0tli9zt" />
-      <bpmn:endEvent id="Event_0tli9zt">
-        <bpmn:incoming>Flow_1j6z8it</bpmn:incoming>
-      </bpmn:endEvent>
-      <bpmn:sequenceFlow id="Flow_1oix3ky" sourceRef="Event_1amat17" targetRef="Activity_0n9xo47" />
-    </bpmn:subProcess>
     <bpmn:userTask id="generate_qr_code" name="Generate QR Code" camunda:assignee="${camunda_user_id}">
       <bpmn:extensionElements>
         <camunda:formData>
@@ -41,54 +19,31 @@
       <bpmn:incoming>Flow_1sbob4f</bpmn:incoming>
       <bpmn:outgoing>Flow_0sfqwuq</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:boundaryEvent id="Event_0hbowab" attachedToRef="Activity_0zrdzko">
-      <bpmn:outgoing>Flow_1fdzax1</bpmn:outgoing>
-      <bpmn:errorEventDefinition id="ErrorEventDefinition_1np0dos" camunda:errorCodeVariable="add_artwork_error" camunda:errorMessageVariable="add_artwork_error_message" />
-    </bpmn:boundaryEvent>
-    <bpmn:sequenceFlow id="Flow_1fdzax1" sourceRef="Event_0hbowab" targetRef="Activity_1xy51e1" />
-    <bpmn:userTask id="Activity_1xy51e1" name="Check Add Artwork Error" camunda:candidateGroups="admin">
-      <bpmn:extensionElements>
-        <camunda:formData />
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_1fdzax1</bpmn:incoming>
-      <bpmn:incoming>Flow_1mtjyhr</bpmn:incoming>
-      <bpmn:outgoing>Flow_0ciqvrp</bpmn:outgoing>
-    </bpmn:userTask>
     <bpmn:serviceTask id="Activity_1a53jgr" name="AddArtworkDelegate" camunda:class="ai.hhrdr.chainflow.engine.AddArtworkDelegate">
       <bpmn:incoming>Flow_0k7fm0a</bpmn:incoming>
       <bpmn:outgoing>Flow_1wed66d</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:sequenceFlow id="Flow_1wed66d" sourceRef="Activity_1a53jgr" targetRef="Gateway_16n1nx7" />
-    <bpmn:sequenceFlow id="Flow_0ciqvrp" sourceRef="Activity_1xy51e1" targetRef="Activity_0zrdzko" />
-    <bpmn:sequenceFlow id="Flow_10trgzt" sourceRef="Gateway_16n1nx7" targetRef="Activity_0zrdzko" />
     <bpmn:parallelGateway id="Gateway_16n1nx7">
       <bpmn:incoming>Flow_1wed66d</bpmn:incoming>
-      <bpmn:outgoing>Flow_10trgzt</bpmn:outgoing>
       <bpmn:outgoing>Flow_1sbob4f</bpmn:outgoing>
+      <bpmn:outgoing>Flow_19e10r3</bpmn:outgoing>
     </bpmn:parallelGateway>
     <bpmn:sequenceFlow id="Flow_1sbob4f" sourceRef="Gateway_16n1nx7" targetRef="generate_qr_code" />
-    <bpmn:sequenceFlow id="Flow_06be0zv" sourceRef="Activity_0zrdzko" targetRef="Gateway_0gimudi" />
     <bpmn:parallelGateway id="Gateway_0gimudi">
-      <bpmn:incoming>Flow_06be0zv</bpmn:incoming>
       <bpmn:incoming>Flow_0sfqwuq</bpmn:incoming>
+      <bpmn:incoming>Flow_001pk7x</bpmn:incoming>
       <bpmn:outgoing>Flow_0yc9c82</bpmn:outgoing>
     </bpmn:parallelGateway>
     <bpmn:sequenceFlow id="Flow_0sfqwuq" sourceRef="generate_qr_code" targetRef="Gateway_0gimudi" />
     <bpmn:sequenceFlow id="Flow_0yc9c82" sourceRef="Gateway_0gimudi" targetRef="Event_0vofw1s" />
-    <bpmn:boundaryEvent id="Event_03cxy21" attachedToRef="Activity_0zrdzko">
-      <bpmn:outgoing>Flow_1mtjyhr</bpmn:outgoing>
-      <bpmn:timerEventDefinition id="TimerEventDefinition_0oigq4m">
-        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT5M</bpmn:timeDuration>
-      </bpmn:timerEventDefinition>
-    </bpmn:boundaryEvent>
-    <bpmn:sequenceFlow id="Flow_1mtjyhr" sourceRef="Event_03cxy21" targetRef="Activity_1xy51e1" />
     <bpmn:userTask id="add_artwork" name="Add Artwork" camunda:assignee="${camunda_user_id}">
       <bpmn:extensionElements>
         <camunda:formData>
-          <camunda:formField id="name" label="Art Name" type="string" />
-          <camunda:formField id="description" label="Art Description" type="string" />
+          <camunda:formField id="name" label="Art Name" type="string" defaultValue="default" />
+          <camunda:formField id="description" label="Art Description" type="string" defaultValue="default" />
           <camunda:formField id="img_picture" label="Picture" type="string" />
-          <camunda:formField id="type" label="type" type="string" defaultValue="artwork" />
+          <camunda:formField id="type" label="type" type="string" defaultValue="art" />
         </camunda:formData>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0wnmv9v</bpmn:incoming>
@@ -99,6 +54,21 @@
     <bpmn:endEvent id="Event_0vofw1s">
       <bpmn:incoming>Flow_0yc9c82</bpmn:incoming>
     </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_19e10r3" sourceRef="Gateway_16n1nx7" targetRef="Activity_07yp578" />
+    <bpmn:callActivity id="Activity_07yp578" name="Add Art, Generate Descriptions Automated" calledElement="automated_add_art">
+      <bpmn:extensionElements>
+        <camunda:in source="name" target="name" />
+        <camunda:out source="all" target="all" />
+        <camunda:in source="description" target="description" />
+        <camunda:in source="art_id" target="art_id" />
+        <camunda:in source="type" target="type" />
+        <camunda:in source="img_picture" target="img_picture" />
+        <camunda:in source="camunda_user_id" target="camunda_user_id" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_19e10r3</bpmn:incoming>
+      <bpmn:outgoing>Flow_001pk7x</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="Flow_001pk7x" sourceRef="Activity_07yp578" targetRef="Gateway_0gimudi" />
     <bpmn:textAnnotation id="TextAnnotation_0aatkvf">
       <bpmn:text>Can be started from generate_ai_artwork or separately</bpmn:text>
     </bpmn:textAnnotation>
@@ -106,177 +76,103 @@
     <bpmn:textAnnotation id="TextAnnotation_0jjdlx1">
       <bpmn:text>POST Artwork in Storage, receiving art_id</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:textAnnotation id="TextAnnotation_17rad66">
-      <bpmn:text>Generate art_description_prompt from image</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:textAnnotation id="TextAnnotation_0n680eh">
-      <bpmn:text>Add art_description_prompt to stored artwork</bpmn:text>
-    </bpmn:textAnnotation>
     <bpmn:textAnnotation id="TextAnnotation_0jsa4ch">
       <bpmn:text>Generate QR Code Task available for user</bpmn:text>
     </bpmn:textAnnotation>
     <bpmn:association id="Association_01lewes" associationDirection="None" sourceRef="generate_qr_code" targetRef="TextAnnotation_0jsa4ch" />
     <bpmn:association id="Association_0q4m91x" associationDirection="None" sourceRef="Activity_1a53jgr" targetRef="TextAnnotation_0jjdlx1" />
-    <bpmn:association id="Association_0tuqv7w" associationDirection="None" sourceRef="AddArtworkDelegate" targetRef="TextAnnotation_0n680eh" />
-    <bpmn:association id="Association_1h6l7jx" associationDirection="None" sourceRef="Activity_0n9xo47" targetRef="TextAnnotation_17rad66" />
   </bpmn:process>
   <bpmn:message id="Message_2tbvvsv" name="add_artwork" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="artworks_add_select">
       <bpmndi:BPMNShape id="BPMNShape_1dkzpz1" bpmnElement="Activity_1a53jgr">
-        <dc:Bounds x="620" y="350" width="100" height="80" />
+        <dc:Bounds x="510" y="180" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1ryr7ls_di" bpmnElement="Activity_1xy51e1">
-        <dc:Bounds x="810" y="80" width="100" height="80" />
+      <bpmndi:BPMNShape id="Gateway_1qtg36n_di" bpmnElement="Gateway_16n1nx7">
+        <dc:Bounds x="665" y="195" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0f6zmws_di" bpmnElement="Activity_07yp578">
+        <dc:Bounds x="770" y="180" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0735co6_di" bpmnElement="generate_qr_code">
-        <dc:Bounds x="1090" y="490" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_1qtg36n_di" bpmnElement="Gateway_16n1nx7">
-        <dc:Bounds x="775" y="365" width="50" height="50" />
+        <dc:Bounds x="770" y="320" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_0rt42wd_di" bpmnElement="Gateway_0gimudi">
-        <dc:Bounds x="1455" y="365" width="50" height="50" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0z6btep_di" bpmnElement="add_artwork">
-        <dc:Bounds x="390" y="350" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartArtworksCreation">
-        <dc:Bounds x="222" y="372" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="206" y="415" width="69" height="27" />
-        </bpmndi:BPMNLabel>
+        <dc:Bounds x="935" y="195" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0bwaleo_di" bpmnElement="Event_0vofw1s">
-        <dc:Bounds x="1592" y="372" width="36" height="36" />
+        <dc:Bounds x="1022" y="202" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0olx7i3_di" bpmnElement="Activity_0zrdzko" isExpanded="true">
-        <dc:Bounds x="905" y="230" width="470" height="220" />
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartArtworksCreation">
+        <dc:Bounds x="212" y="202" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="196" y="245" width="69" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1amat17_di" bpmnElement="Event_1amat17">
-        <dc:Bounds x="925.3333333333334" y="352" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0sbq7id_di" bpmnElement="Activity_0n9xo47">
-        <dc:Bounds x="1015" y="330" width="100" height="80" />
+      <bpmndi:BPMNShape id="Activity_0z6btep_di" bpmnElement="add_artwork">
+        <dc:Bounds x="320" y="180" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_01um9gv_di" bpmnElement="AddArtworkDelegate">
-        <dc:Bounds x="1165" y="330" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0tli9zt_di" bpmnElement="Event_0tli9zt">
-        <dc:Bounds x="1317" y="352" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_1oix3ky_di" bpmnElement="Flow_1oix3ky">
-        <di:waypoint x="961" y="370" />
-        <di:waypoint x="1015" y="370" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_10gy4o5_di" bpmnElement="Flow_10gy4o5">
-        <di:waypoint x="1115" y="370" />
-        <di:waypoint x="1165" y="370" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1j6z8it_di" bpmnElement="Flow_1j6z8it">
-        <di:waypoint x="1265" y="370" />
-        <di:waypoint x="1317" y="370" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_0q4m91x_di" bpmnElement="Association_0q4m91x">
-        <di:waypoint x="635" y="350" />
-        <di:waypoint x="605" y="315" />
+        <di:waypoint x="525" y="180" />
+        <di:waypoint x="495" y="145" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_01lewes_di" bpmnElement="Association_01lewes">
-        <di:waypoint x="1154" y="570" />
-        <di:waypoint x="1165" y="600" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_1h6l7jx_di" bpmnElement="Association_1h6l7jx">
-        <di:waypoint x="1077" y="330" />
-        <di:waypoint x="1083" y="310" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_0tuqv7w_di" bpmnElement="Association_0tuqv7w">
-        <di:waypoint x="1238" y="330" />
-        <di:waypoint x="1249" y="310" />
+        <di:waypoint x="845" y="400" />
+        <di:waypoint x="865" y="430" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_1284ohw_di" bpmnElement="Association_1284ohw">
-        <di:waypoint x="241" y="372" />
-        <di:waypoint x="245" y="330" />
+        <di:waypoint x="226" y="203" />
+        <di:waypoint x="217" y="160" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="Event_0rs0hdf_di" bpmnElement="Event_0hbowab">
-        <dc:Bounds x="1012" y="212" width="36" height="36" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_03zdz3c_di" bpmnElement="Event_03cxy21">
-        <dc:Bounds x="962" y="212" width="36" height="36" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_0jjdlx1_di" bpmnElement="TextAnnotation_0jjdlx1">
-        <dc:Bounds x="520" y="260" width="99.99156545209178" height="55.330634278002705" />
+        <dc:Bounds x="410" y="90" width="100" height="55" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_0n680eh_di" bpmnElement="TextAnnotation_0n680eh">
-        <dc:Bounds x="1230" y="240" width="100" height="70" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_17rad66_di" bpmnElement="TextAnnotation_17rad66">
-        <dc:Bounds x="1050" y="240" width="99.9959660068847" height="69.9965038726334" />
+      <bpmndi:BPMNShape id="TextAnnotation_0aatkvf_di" bpmnElement="TextAnnotation_0aatkvf">
+        <dc:Bounds x="160" y="76" width="100" height="84" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_0jsa4ch_di" bpmnElement="TextAnnotation_0jsa4ch">
-        <dc:Bounds x="1120" y="600" width="100" height="70" />
+        <dc:Bounds x="830" y="430" width="100" height="70" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_1wed66d_di" bpmnElement="Flow_1wed66d">
-        <di:waypoint x="720" y="390" />
-        <di:waypoint x="775" y="390" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1fdzax1_di" bpmnElement="Flow_1fdzax1">
-        <di:waypoint x="1030" y="212" />
-        <di:waypoint x="1030" y="100" />
-        <di:waypoint x="910" y="100" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0ciqvrp_di" bpmnElement="Flow_0ciqvrp">
-        <di:waypoint x="860" y="160" />
-        <di:waypoint x="860" y="340" />
-        <di:waypoint x="905" y="340" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1sbob4f_di" bpmnElement="Flow_1sbob4f">
-        <di:waypoint x="800" y="415" />
-        <di:waypoint x="800" y="530" />
-        <di:waypoint x="1090" y="530" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0sfqwuq_di" bpmnElement="Flow_0sfqwuq">
-        <di:waypoint x="1190" y="530" />
-        <di:waypoint x="1480" y="530" />
-        <di:waypoint x="1480" y="415" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_10trgzt_di" bpmnElement="Flow_10trgzt">
-        <di:waypoint x="825" y="390" />
-        <di:waypoint x="905" y="390" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_06be0zv_di" bpmnElement="Flow_06be0zv">
-        <di:waypoint x="1375" y="390" />
-        <di:waypoint x="1455" y="390" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0yc9c82_di" bpmnElement="Flow_0yc9c82">
-        <di:waypoint x="1505" y="390" />
-        <di:waypoint x="1592" y="390" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1mtjyhr_di" bpmnElement="Flow_1mtjyhr">
-        <di:waypoint x="980" y="212" />
-        <di:waypoint x="980" y="120" />
-        <di:waypoint x="910" y="120" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0wnmv9v_di" bpmnElement="Flow_0wnmv9v">
-        <di:waypoint x="258" y="390" />
-        <di:waypoint x="390" y="390" />
+        <di:waypoint x="248" y="220" />
+        <di:waypoint x="320" y="220" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0k7fm0a_di" bpmnElement="Flow_0k7fm0a">
-        <di:waypoint x="490" y="390" />
-        <di:waypoint x="620" y="390" />
+        <di:waypoint x="420" y="220" />
+        <di:waypoint x="510" y="220" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="TextAnnotation_0aatkvf_di" bpmnElement="TextAnnotation_0aatkvf">
-        <dc:Bounds x="200" y="246" width="99.99656781987919" height="84.01976935749589" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1wed66d_di" bpmnElement="Flow_1wed66d">
+        <di:waypoint x="610" y="220" />
+        <di:waypoint x="665" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1sbob4f_di" bpmnElement="Flow_1sbob4f">
+        <di:waypoint x="690" y="245" />
+        <di:waypoint x="690" y="360" />
+        <di:waypoint x="770" y="360" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_19e10r3_di" bpmnElement="Flow_19e10r3">
+        <di:waypoint x="715" y="220" />
+        <di:waypoint x="770" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_001pk7x_di" bpmnElement="Flow_001pk7x">
+        <di:waypoint x="870" y="220" />
+        <di:waypoint x="935" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0sfqwuq_di" bpmnElement="Flow_0sfqwuq">
+        <di:waypoint x="870" y="360" />
+        <di:waypoint x="960" y="360" />
+        <di:waypoint x="960" y="245" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0yc9c82_di" bpmnElement="Flow_0yc9c82">
+        <di:waypoint x="985" y="220" />
+        <di:waypoint x="1022" y="220" />
+      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
