@@ -13,7 +13,7 @@ services:
     build: ./external_workers
     networks:
       - local-proj-network
-    command: ["python", "workers/dall_e_blender.py"]
+    command: ["python", "workers/dall_e_generate_descriptive_prompt.py"]
     environment:
       - TOPIC=DallEGenerateDescriptivePrompt
     env_file:
