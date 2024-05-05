@@ -32,6 +32,7 @@ import asyncio
 import os
 import logging
 import uuid
+from typing import Optional
 
 import httpx
 from camunda.external_task.external_task import ExternalTask, TaskResult
@@ -39,7 +40,7 @@ from camunda.external_task.external_task_worker import ExternalTaskWorker
 from openai import AsyncOpenAI
 from openai.types import ImagesResponse
 
-from web3_workers.utils import upload_file_to_s3_binary
+from workers.utils import upload_file_to_s3_binary
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -89,7 +90,7 @@ async def generate_image(prompt):
         raise
 
 
-async def fetch_art(art_id: str) -> dict | None:
+async def fetch_art(art_id: str) -> Optional[dict]:
     async with httpx.AsyncClient() as _client:
         response = await _client.get(f"{ARTWORKS_URL}/{art_id}")
         if response.status_code == 200:
