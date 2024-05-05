@@ -67,6 +67,12 @@
       <artifactId>spring-boot-starter-jdbc</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.2.23</version>
+    </dependency>
+
     <!-- Required to use Spin dataformat support -->
     <dependency>
       <groupId>org.camunda.spin</groupId>

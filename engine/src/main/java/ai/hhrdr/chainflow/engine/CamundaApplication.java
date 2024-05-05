@@ -1,18 +1,25 @@
 package ai.hhrdr.chainflow.engine;
 
 import javax.servlet.Filter;
+
 import org.camunda.bpm.engine.rest.security.auth.ProcessEngineAuthenticationFilter;
 import org.camunda.bpm.spring.boot.starter.annotation.EnableProcessApplication;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.transaction.PlatformTransactionManager;
 
+import javax.sql.DataSource;
 
 
 @SpringBootApplication
@@ -43,6 +50,19 @@ public class CamundaApplication extends SpringBootServletInitializer {
   @Bean
   public static PropertySourcesPlaceholderConfigurer propertyConfigurer() {
     return new PropertySourcesPlaceholderConfigurer();
+  }
+
+
+  @Bean
+  public PlatformTransactionManager transactionManager() {
+    return new DataSourceTransactionManager(camundaDataSource());
+  }
+  @Bean(name="camundaBpmDataSource")
+  @Primary
+  @ConfigurationProperties(prefix="camunda.bpm.datasource")
+  public DataSource camundaDataSource() {
+    System.out.println("camunda.bpm.datasource");
+    return DataSourceBuilder.create().build();
   }
 
   @Bean
