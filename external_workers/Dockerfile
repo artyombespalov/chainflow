@@ -11,5 +11,3 @@ RUN mkdir /code/
 WORKDIR /code/
 ADD . /code/
 ENV PYTHONPATH=.
-
-CMD ["python", "web3_workers/check_transaction_status.py"]

@@ -12,7 +12,7 @@ from botocore.exceptions import NoCredentialsError
 
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-AWS_REGION_NAME = os.getenv('ARTWORKS_URL', 'us-east-2')
+AWS_REGION_NAME = os.getenv('AWS_REGION', 'us-east-2')
 
 
 def upload_file_to_s3_binary(content: bytes, bucket_name, s3_file_name) -> str:

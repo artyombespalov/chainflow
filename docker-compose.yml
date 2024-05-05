@@ -1,22 +1,53 @@
 version: '3.8'
 
 services:
-  chainflow-engine:
-    build: ./engine
-    ports:
-      - "8080:8080"
-    networks:
-      - chainflow-network
-  external_workers:
+  engine:
+   image: docker-registry.dexguru.biz/dex.guru/chainflow-deployment/chainflow-deployment/engine-niftnet:latest
+   platform: linux/amd64
+   ports:
+     - "8085:8080"
+   networks:
+     - local-proj-network
+
+  external_workers_dalle_describe:
     build: ./external_workers
     networks:
-      - chainflow-network
+      - local-proj-network
+    command: ["python", "workers/dall_e_blender.py"]
+    environment:
+      - TOPIC=DallEGenerateDescriptivePrompt
+    env_file:
+      - .env
+
+  external_workers_dalle_blender:
+    build: ./external_workers
+    networks:
+      - local-proj-network
+    command: ["python", "workers/dall_e_blender.py"]
+    environment:
+      - TOPIC=DallEGenerateArtBlender
+    env_file:
+      - .env
+
+  external_workers_faceswap:
+    build: ./external_workers
+    networks:
+      - local-proj-network
+    command: ["python", "workers/faceswap.py"]
+    environment:
+      - TOPIC=FaceSwapWorker
+    env_file:
+      - .env  # Specify the .env file here
+
   gui:
     build: ./gui
     ports:
       - "3000:3000"
     networks:
-      - chainflow-network
+      - local-proj-network
+    env_file:
+      - .env
+
 networks:
-  chainflow-network:
+  local-proj-network:
     driver: bridge

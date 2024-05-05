@@ -9,8 +9,8 @@ from camunda.external_task.external_task import ExternalTask
 import requests
 import replicate
 
-from web3_workers.dall_e_blender import fetch_art
-from web3_workers.utils import upload_file_to_s3_binary
+from workers.dall_e_blender import fetch_art
+from workers.utils import upload_file_to_s3_binary
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
