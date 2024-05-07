@@ -64,7 +64,7 @@
     <bpmn:sequenceFlow id="Flow_1o2ce10" name="Yes&#10;" sourceRef="Gateway_0t74v1w" targetRef="Activity_1ldqql2" />
     <bpmn:sequenceFlow id="Flow_0g8k3zm" sourceRef="Activity_1ldqql2" targetRef="Event_1e7us7e" />
     <bpmn:sequenceFlow id="Flow_00f8b3p" sourceRef="user_task_upload_image" targetRef="Activity_0mmo6jm" />
-    <bpmn:userTask id="user_task_review_samples" name="Review Generated Samples">
+    <bpmn:userTask id="user_task_review_samples" name="Review Generated Samples" camunda:assignee="${camunda_user_id}">
       <bpmn:extensionElements>
         <camunda:formData>
           <camunda:formField id="is_approved" label="is_approved" type="boolean" defaultValue="true" />
