@@ -31,7 +31,7 @@ public class GetEventsDelegate implements JavaDelegate {
     try {
       HttpRequest req = HttpRequest
               .newBuilder()
-              .uri(URI.create(apiURL + "/api/events"))
+              .uri(URI.create(apiURL + "/api/event"))
               .header("Authorization", apiKey)
               .GET() // Use GET method to retrieve data
               .build();

@@ -41,7 +41,7 @@ public class AddEventDelegate implements JavaDelegate {
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(apiURL + "/api/events"))
+                .uri(URI.create(apiURL + "/api/event"))
                 .header("Content-Type", "application/json")
                 .header("Authorization", apiKey) // Ensure your API key is correctly set up for authorization
                 .POST(BodyPublishers.ofString(json.toString()))

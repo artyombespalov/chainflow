@@ -31,7 +31,7 @@ public class GetArtsDelegate implements JavaDelegate {
     try {
       HttpRequest req = HttpRequest
               .newBuilder()
-              .uri(URI.create(apiURL + "/api/arts"))
+              .uri(URI.create(apiURL + "/api/art"))
               .header("Authorization", apiKey)
               .GET() // Use GET method to retrieve data
               .build();

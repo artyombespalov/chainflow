@@ -52,7 +52,7 @@ public class AddArtworkDelegate implements JavaDelegate {
         if (artId == null) {
             // Create new artwork
             request = HttpRequest.newBuilder()
-                    .uri(URI.create(apiURL + "/api/arts"))
+                    .uri(URI.create(apiURL + "/api/art"))
                     .header("Content-Type", "application/json")
                     .header("Authorization", apiKey)
                     .POST(BodyPublishers.ofString(json.toString()))
@@ -60,7 +60,7 @@ public class AddArtworkDelegate implements JavaDelegate {
         } else {
             // Update existing artwork
             request = HttpRequest.newBuilder()
-                    .uri(URI.create(apiURL + "/api/arts/" + artId))
+                    .uri(URI.create(apiURL + "/api/art/" + artId))
                     .header("Content-Type", "application/json")
                     .header("Authorization", apiKey)
                     .PUT(BodyPublishers.ofString(json.toString()))
