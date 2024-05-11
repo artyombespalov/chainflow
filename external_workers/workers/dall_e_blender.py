@@ -48,7 +48,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # Environment variables to configure the script
 TOPIC_NAME = os.getenv('TOPIC_NAME', "DallEGenerateArtBlender")
 CAMUNDA_URL = os.getenv('CAMUNDA_URL', 'http://demo:demo@localhost:8080/engine-rest')
-ARTWORKS_URL = os.getenv('ARTWORKS_URL', 'http://localhost:5000/api/arts')
+ARTWORKS_URL = os.getenv('ARTWORKS_URL', 'http://localhost:5000/api/art')
 AWS_S3_BUCKET = os.getenv('AWS_S3_BUCKET', 'pixelpact')
 
 # Logging the script startup
