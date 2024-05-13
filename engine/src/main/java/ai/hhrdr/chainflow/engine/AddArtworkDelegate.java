@@ -1,7 +1,9 @@
 package ai.hhrdr.chainflow.engine;
 
+import ai.hhrdr.chainflow.engine.exceptions.ArtworkProcessingException;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -9,8 +11,8 @@ import org.springframework.stereotype.Component;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.logging.Logger;
 
@@ -45,41 +47,54 @@ public class AddArtworkDelegate implements JavaDelegate {
         json.put("description_prompt", artDescriptionPrompt);
         json.put("reference_id", referenceId);
 
-        HttpClient client = HttpClient.newHttpClient();
+        HttpClient client = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
+                .build();
+
         HttpRequest request;
         HttpResponse<String> response;
 
-        if (artId == null) {
-            // Create new artwork
-            request = HttpRequest.newBuilder()
-                    .uri(URI.create(apiURL + "/api/art"))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", apiKey)
-                    .POST(BodyPublishers.ofString(json.toString()))
-                    .build();
-        } else {
-            // Update existing artwork
-            request = HttpRequest.newBuilder()
-                    .uri(URI.create(apiURL + "/api/art/" + artId))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", apiKey)
-                    .PUT(BodyPublishers.ofString(json.toString()))
-                    .build();
-        }
-
         try {
-            response = client.send(request, BodyHandlers.ofString());
             if (artId == null) {
-                // Extract new art ID and set it in the context if creating new art
-                JSONObject art = new JSONObject(response.body());
-                artId = art.getString("id");
-                execution.setVariable("art_id", artId);
+                // Create new artwork
+                request = HttpRequest.newBuilder()
+                        .uri(URI.create(apiURL + "/api/art"))
+                        .header("Content-Type", "application/json")
+                        .header("X-SYS-KEY", apiKey)
+                        .POST(BodyPublishers.ofString(json.toString()))
+                        .build();
+            } else {
+                // Update existing artwork
+                request = HttpRequest.newBuilder()
+                        .uri(URI.create(apiURL + "/api/art/" + artId))
+                        .header("Content-Type", "application/json")
+                        .header("X-SYS-KEY", apiKey)
+                        .PUT(BodyPublishers.ofString(json.toString()))
+                        .build();
             }
+
+            response = client.send(request, BodyHandlers.ofString());
+
+            if (response.statusCode() >= 400) {
+                String errorMsg = "HTTP error response: " + response.statusCode() + " " + response.body();
+                LOGGER.severe(errorMsg);
+                throw new ArtworkProcessingException(errorMsg);
+            }
+
+            // Extract new art ID and set it in the context if creating new art
+            JSONObject art = new JSONObject(response.body());
+            artId = art.getString("id");
+            execution.setVariable("art_id", artId);
             LOGGER.info("Art operation response status code: " + response.statusCode());
             LOGGER.info("Art operation response body: " + response.body());
+        } catch (JSONException e) {
+            String errorMsg = "Failed to process art. JSONException: " + e.getMessage();
+            LOGGER.severe(errorMsg);
+            throw new ArtworkProcessingException(errorMsg);
         } catch (Exception e) {
-            LOGGER.severe("Failed to process art. Exception: " + e.getMessage());
-            throw e;
+            String errorMsg = "Failed to process art. Exception: " + e.getMessage();
+            LOGGER.severe(errorMsg);
+            throw new ArtworkProcessingException(errorMsg);
         }
     }
 }

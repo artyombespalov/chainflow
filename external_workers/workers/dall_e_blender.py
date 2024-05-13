@@ -48,7 +48,8 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # Environment variables to configure the script
 TOPIC_NAME = os.getenv('TOPIC_NAME', "DallEGenerateArtBlender")
 CAMUNDA_URL = os.getenv('CAMUNDA_URL', 'http://demo:demo@localhost:8080/engine-rest')
-ARTWORKS_URL = os.getenv('ARTWORKS_URL', 'http://localhost:5000/api/art')
+ARTWORKS_URL = os.getenv('ARTWORKS_URL', 'http://localhost:8000/api/arts')
+X_SYS_KEY = os.getenv('X_SYS_KEY', 'secret')
 AWS_S3_BUCKET = os.getenv('AWS_S3_BUCKET', 'pixelpact')
 
 # Logging the script startup
@@ -92,7 +93,10 @@ async def generate_image(prompt):
 
 async def fetch_art(art_id: str) -> Optional[dict]:
     async with httpx.AsyncClient() as _client:
-        response = await _client.get(f"{ARTWORKS_URL}/{art_id}")
+        headers = {
+            "X-SYS-KEY": X_SYS_KEY
+        }
+        response = await _client.get(f"{ARTWORKS_URL}/{art_id}", headers=headers)
         if response.status_code == 200:
             return response.json()
         else:
