@@ -100,27 +100,28 @@
     <bpmn:sequenceFlow id="Flow_0ymj15k" sourceRef="Gateway_15u2ybo" targetRef="user_task_upload_image">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${error_code_faceswap_processor == 'cannot_swap_faces'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_0r9hvgp" sourceRef="Gateway_15u2ybo" targetRef="Activity_0r8k75x" />
-    <bpmn:userTask id="Activity_0r8k75x" name="Admin Task To Check LLM Model Results" camunda:assignee="admin">
+    <bpmn:sequenceFlow id="Flow_0r9hvgp" sourceRef="Gateway_15u2ybo" targetRef="admin_task_check_llm_model_results" />
+    <bpmn:userTask id="admin_task_check_llm_model_results" name="Admin Task To Check LLM Model Results" camunda:assignee="admin">
       <bpmn:incoming>Flow_0r9hvgp</bpmn:incoming>
       <bpmn:incoming>Flow_00awrh0</bpmn:incoming>
       <bpmn:incoming>Flow_1w2q14s</bpmn:incoming>
       <bpmn:incoming>Flow_0s1opvh</bpmn:incoming>
+      <bpmn:incoming>Flow_0c1frll</bpmn:incoming>
       <bpmn:outgoing>Flow_14snrs3</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:sequenceFlow id="Flow_14snrs3" sourceRef="Activity_0r8k75x" targetRef="Activity_0mmo6jm" />
+    <bpmn:sequenceFlow id="Flow_14snrs3" sourceRef="admin_task_check_llm_model_results" targetRef="Activity_0mmo6jm" />
     <bpmn:boundaryEvent id="Event_07vez33" attachedToRef="DallEBlenderProcessor">
       <bpmn:outgoing>Flow_00awrh0</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_1ysrl59">
         <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT300S</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:boundaryEvent>
-    <bpmn:sequenceFlow id="Flow_00awrh0" sourceRef="Event_07vez33" targetRef="Activity_0r8k75x" />
+    <bpmn:sequenceFlow id="Flow_00awrh0" sourceRef="Event_07vez33" targetRef="admin_task_check_llm_model_results" />
     <bpmn:boundaryEvent id="Event_02uvlyp" attachedToRef="DallEBlenderProcessor">
       <bpmn:outgoing>Flow_1w2q14s</bpmn:outgoing>
       <bpmn:errorEventDefinition id="ErrorEventDefinition_12oofyq" camunda:errorCodeVariable="error_code_dalle_blender" camunda:errorMessageVariable="error_message_dalle_blender" />
     </bpmn:boundaryEvent>
-    <bpmn:sequenceFlow id="Flow_1w2q14s" sourceRef="Event_02uvlyp" targetRef="Activity_0r8k75x" />
+    <bpmn:sequenceFlow id="Flow_1w2q14s" sourceRef="Event_02uvlyp" targetRef="admin_task_check_llm_model_results" />
     <bpmn:serviceTask id="FaceSwapProcessor" name="FaceSwap Processor" camunda:type="external" camunda:topic="FaceSwapWorker">
       <bpmn:incoming>Flow_1f1dv3c</bpmn:incoming>
       <bpmn:outgoing>Flow_1wwp10y</bpmn:outgoing>
@@ -131,7 +132,7 @@
         <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT300S</bpmn:timeDuration>
       </bpmn:timerEventDefinition>
     </bpmn:boundaryEvent>
-    <bpmn:sequenceFlow id="Flow_0s1opvh" sourceRef="Event_03ehlsn" targetRef="Activity_0r8k75x" />
+    <bpmn:sequenceFlow id="Flow_0s1opvh" sourceRef="Event_03ehlsn" targetRef="admin_task_check_llm_model_results" />
     <bpmn:boundaryEvent id="Event_04vmbzv" attachedToRef="FaceSwapProcessor">
       <bpmn:outgoing>Flow_1uq0q4p</bpmn:outgoing>
       <bpmn:errorEventDefinition id="ErrorEventDefinition_1ygwch7" camunda:errorCodeVariable="error_code_faceswap_processor" camunda:errorMessageVariable="error_message_faceswap_processor" />
@@ -152,6 +153,11 @@
     <bpmn:sequenceFlow id="Flow_17dv30n" sourceRef="Gateway_0vn15k3" targetRef="user_task_review_samples" />
     <bpmn:sequenceFlow id="Flow_0vkzti6" sourceRef="Gateway_0vn15k3" targetRef="Activity_00qzvmx" />
     <bpmn:sequenceFlow id="Flow_18lgokm" sourceRef="Activity_00qzvmx" targetRef="Gateway_0x2z68o" />
+    <bpmn:sequenceFlow id="Flow_0c1frll" sourceRef="Event_0eiulnk" targetRef="admin_task_check_llm_model_results" />
+    <bpmn:boundaryEvent id="Event_0eiulnk" attachedToRef="Activity_0mmo6jm">
+      <bpmn:outgoing>Flow_0c1frll</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_14agav0" camunda:errorCodeVariable="error_code_add_generated_art" camunda:errorMessageVariable="error_message_add_generated_art" />
+    </bpmn:boundaryEvent>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="generate_ai_artwork">
@@ -195,7 +201,7 @@
       <bpmndi:BPMNShape id="Gateway_15u2ybo_di" bpmnElement="Gateway_15u2ybo" isMarkerVisible="true">
         <dc:Bounds x="905" y="505" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0jk3gme_di" bpmnElement="Activity_0r8k75x">
+      <bpmndi:BPMNShape id="Activity_0jk3gme_di" bpmnElement="admin_task_check_llm_model_results">
         <dc:Bounds x="750" y="410" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_0hh6pes" bpmnElement="FaceSwapProcessor">
@@ -219,6 +225,9 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_12afjiw_di" bpmnElement="Event_07vez33">
         <dc:Bounds x="762" y="332" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1oyo0n6_di" bpmnElement="Event_0eiulnk">
+        <dc:Bounds x="592" y="332" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1caskys_di" bpmnElement="Flow_1caskys">
         <di:waypoint x="188" y="310" />
@@ -276,8 +285,8 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_14snrs3_di" bpmnElement="Flow_14snrs3">
         <di:waypoint x="750" y="450" />
-        <di:waypoint x="580" y="450" />
-        <di:waypoint x="580" y="350" />
+        <di:waypoint x="550" y="450" />
+        <di:waypoint x="550" y="350" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_00awrh0_di" bpmnElement="Flow_00awrh0">
         <di:waypoint x="780" y="368" />
@@ -320,6 +329,11 @@
         <di:waypoint x="1330" y="170" />
         <di:waypoint x="1420" y="170" />
         <di:waypoint x="1420" y="285" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0c1frll_di" bpmnElement="Flow_0c1frll">
+        <di:waypoint x="610" y="368" />
+        <di:waypoint x="610" y="430" />
+        <di:waypoint x="750" y="430" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
